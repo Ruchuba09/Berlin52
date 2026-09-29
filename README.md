@@ -12,9 +12,9 @@ Coeficiente heurístico \beta: 2.5 (valor entre 2 y 5)
 q_0=0.9
 Formulas:
 
-\eta=\frac{1}{D_{ij}}
-\tau_{ij}^{0}=\frac{1}{NumVariables*Costo(solucion_{inicial})}
-\Delta=\frac{1}{Costo(solucion_{mejor})}
+- \eta=\frac{1}{D_{ij}}
+- \tau_{ij}^{0}=\frac{1}{NumVariables*Costo(solucion_{inicial})}
+- \Delta=\frac{1}{Costo(solucion_{mejor})}
 Conjunto de pruebas:
 
 Berlin52
