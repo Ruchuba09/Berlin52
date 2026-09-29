@@ -10,6 +10,8 @@ Número de hormigas: entre 10 y 100
 Factor de evaporación \alpha: 0.1
 Coeficiente heurístico \beta: 2.5 (valor entre 2 y 5)
 q_0=0.9
+
+
 Formulas:
 
 $$
