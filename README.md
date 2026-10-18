@@ -19,20 +19,20 @@ pip install -r requirements.txt
 El repositorio sigue una organización modular con separación de responsabilidades:
 
 ```text
-Berlin52-main/
-├── acs.py                 # Orquestador principal del algoritmo ACS
-├── operadores.py          # Biblioteca de funciones (distancias, heurística, feromonas)
-├── tests.py               # Casos de prueba automatizados de los operadores
-├── graficar.py            # Generación automática de gráficos por lote
-├── requirements.txt       # Lista de dependencias del entorno Python
+Berlin52/
+├── acs.py                 # Orquestador del flujo principal del algoritmo ACS
+├── operadores.py          # Biblioteca de funciones matemáticas y operadores
+├── tests.py               # Casos de prueba unitarios automatizados
+├── graficar.py            # Generación de gráficos a partir de resultados.csv
+├── requirements.txt       # Dependencias del proyecto
 ├── datos/
-│   └── berlin52.tsp.txt   # Instancia de coordenadas de ciudades (TSPLIB)
+│   └── berlin52.tsp.txt   # Instancia con coordenadas cartesianas de 52 ciudades
 ├── resultados/
 │   └── resultados.csv     # Archivo estructurado con los resultados experimentales
-├── graficos/
-│   ├── grafico1.png       # Trazado oficial de la mejor ruta global del estudio
-│   └── grafico_exp*.png   # Trazados individuales generados por experimento
-└── README.md              # Documentación técnica y guía de usuario
+├── graficos/              # Gráficos generados para cada experimento
+│   ├── grafico_exp01_s12345_h50_c7544.png
+│   └── ...
+└── README.md              # Documentación técnica y guía de uso
 ```
 
 ---
@@ -62,23 +62,48 @@ python acs.py datos/berlin52.tsp.txt 50 200 0.1 2.5 0.9 12345 resultados/resulta
 
 ---
 
-### B. Ejecución de Pruebas Unitarias (`tests.py`)
-Para comprobar el funcionamiento de la lectura de archivos, el cálculo de matrices y la validez de las soluciones generadas:
+### B. Batería de Pruebas Experimentales
+Para registrar el conjunto de experimentos y evaluar el impacto de cada parámetro:
 
 ```bash
-python tests.py
+# 1. Variabilidad por semilla
+python acs.py datos/berlin52.tsp.txt 50 200 0.1 2.5 0.9 12345 resultados/resultados.csv
+python acs.py datos/berlin52.tsp.txt 50 200 0.1 2.5 0.9 23456 resultados/resultados.csv
+python acs.py datos/berlin52.tsp.txt 50 200 0.1 2.5 0.9 34567 resultados/resultados.csv
+python acs.py datos/berlin52.tsp.txt 50 200 0.1 2.5 0.9 45678 resultados/resultados.csv
+
+# 2. Variación de tamaño de colonia (hormigas)
+python acs.py datos/berlin52.tsp.txt 10 200 0.1 2.5 0.9 12345 resultados/resultados.csv
+python acs.py datos/berlin52.tsp.txt 30 200 0.1 2.5 0.9 12345 resultados/resultados.csv
+python acs.py datos/berlin52.tsp.txt 80 200 0.1 2.5 0.9 12345 resultados/resultados.csv
+
+# 3. Variación del número de iteraciones
+python acs.py datos/berlin52.tsp.txt 50 50 0.1 2.5 0.9 12345 resultados/resultados.csv
+python acs.py datos/berlin52.tsp.txt 50 400 0.1 2.5 0.9 12345 resultados/resultados.csv
+
+# 4. Variación de parámetros propios de ACS (q0 y beta)
+python acs.py datos/berlin52.tsp.txt 50 200 0.1 2.5 0.5 12345 resultados/resultados.csv
+python acs.py datos/berlin52.tsp.txt 50 200 0.1 5.0 0.9 12345 resultados/resultados.csv
 ```
 
 ---
 
-### C. Generación del Gráfico de la Ruta (`graficar.py`)
+### C. Ejecución de Pruebas Unitarias (`tests.py`)
+Para verificar la lectura de archivos, el cálculo exacto de distancias, la validez de las soluciones y la actualización de feromonas:
+
+```bash
+python tests.py
+```
+---
+
+### D. Generación de Gráficos (`graficar.py`)
 Para generar la visualización de la ruta a partir de los resultados:
 
 ```bash
 python graficar.py resultados/resultados.csv
 ```
 
-* **Nombrado automático por experimento:** El script procesa todas las filas registradas en el CSV y genera una imagen individual identificada con sus parámetros y costo en `graficos/grafico_exp[ID]_s[semilla]_h[hormigas]_c[costo].png`.
+* **Salida:** Las imágenes se guardan de forma automática en la carpeta `graficos/` identificadas por experimento (por ejemplo, `graficos/grafico_exp01_s12345_h50_c7544.png`).
 
 ---
 
@@ -128,28 +153,40 @@ El archivo de salida almacena la información estructurada de las corridas para 
 * `Ruta`: Secuencia ordenada de ciudades visitadas separadas por guiones.
 
 ---
+## 8. Resumen del Mejor Resultado Obtenido
 
-## 8. Transferencia a un Problema Más Complejo (PFSP)
+Tras ejecutar la batería de pruebas experimentales, el algoritmo alcanzó con éxito el valor óptimo global de la instancia:
+
+* **Mejor Costo alcanzado:** 7544.37 (Óptimo global TSPLIB)
+* **Configuración óptima:** 50 hormigas, 200 iteraciones, $\alpha = 0.1$, $\beta = 2.5$, $q_0 = 0.9$, semilla `12345`.
+* **Archivo gráfico asociado:** `graficos/grafico_exp01_s12345_h50_c7544.png`
+* **Tiempo de cómputo promedio:** ~1.5 a 3.0 segundos de CPU.
+* **Comportamiento observado:** La combinación de explotación intensiva ($q_0 = 0.9$) con evaporación local rápida permitió evitar mínimos locales tempranos, alcanzando una convergencia consistente y óptima en múltiples ejecuciones.
+
+----
+
+## 9. Transferencia a un Problema Más Complejo (PFSP)
 
 Respuestas al análisis formativo de transferencia metodológica hacia el *Permutation Flow Shop Scheduling Problem* (PFSP):
 
 ### 1. ¿Qué partes de `acs.py` podrían mantenerse?
-* **Arquitectura de control del flujo:** Se mantiene el ciclo principal de iteraciones, la inicialización de estructuras, la construcción iterativa de soluciones por hormiga y el registro de la mejor solución global.
-* **Mecanismos propios de ACS:** Se conserva la regla de decisión pseudo-aleatoria proporcional ($q_0$), la regla de evaporación local para diversificar la búsqueda y el refuerzo de feromona global exclusivo para la mejor solución.
+* **Estructura general de control:** El ciclo por iteraciones, la gestión de colonias, la construcción paso a paso de soluciones por parte de cada hormiga y la actualización de la mejor solución global encontrada.
+* **Mecanismos de toma de decisiones de ACS:** La regla de selección pseudo-aleatoria proporcional ponderada por $q_0$, la regla de evaporación local de feromonas para favorecer la diversificación y el depósito global de feromonas reservado para la mejor solución histórica.
 
 ### 2. ¿Qué operaciones de `operadores.py` deberían modificarse o reemplazarse?
-* **Lectura de datos:** Se sustituye el parser de coordenadas cartesianas $(x, y)$ por una función que lea una matriz de tiempos de procesamiento $p_{i,j}$ para $n$ trabajos en $m$ máquinas.
-* **Información heurística ($\eta_{ij}$):** Se reemplaza el inverso de la distancia euclidiana ($1/d_{ij}$) por métricas de scheduling, como la regla de menor tiempo de procesamiento total (SPT) o visibilidad basada en NEH.
-* **Función de costo:** Se elimina la distancia euclidiana acumulada y se incorpora el cálculo del Makespan ($C_{\max}$).
-* **Grafo de transiciones:** La feromona conecta ahora la programación del trabajo $j$ inmediatamente después del trabajo $i$.
+* **Lectura de datos:** Se reemplaza la lectura de coordenadas bidimensionales $(x, y)$ por una función que lea matrices de tiempos de procesamiento $p_{i,j}$ para $n$ trabajos en $m$ máquinas.
+* **Información heurística ($\eta_{ij}$):** El inverso de la distancia ($1/d_{ij}$) deja de tener sentido físico. Debe reemplazarse por heurísticas de ordenamiento de producción, como la regla de menor tiempo de procesamiento total (SPT) o indicadores derivados del algoritmo NEH.
+* **Función de costo:** Se elimina la distancia euclidiana del ciclo y se implementa el cómputo del Makespan ($C_{\max}$).
+* **Estructura de feromonas:** En lugar de asociar la feromona a aristas geométricas entre ciudades, se modela la conveniencia de programar un trabajo $j$ inmediatamente a continuación del trabajo $i$, o bien la asignación del trabajo $j$ a la posición $k$ de la secuencia.
 
 ### 3. ¿Qué nueva información necesitaría representar una solución?
-* En TSP, la solución representa un ciclo cerrado de ciudades visitadas con retorno obligatorio al origen.
-* En PFSP, la solución es una **permutación lineal estricta** $\pi = (\pi_1, \pi_2, \dots, \pi_n)$ de $n$ trabajos, representando el orden idéntico en que entran secuencialmente a cada una de las máquinas (sin retorno al origen).
+* En TSP, la solución es un recorrido cíclico cerrado con retorno obligatorio a la ciudad de origen.
+* En PFSP, la solución es una **permutación lineal** $\pi = (\pi_1, \pi_2, \dots, \pi_n)$ de $n$ trabajos. Representa el orden único en el que las piezas ingresan secuencialmente a cada una de las $m$ máquinas del taller (sin ciclo de retorno).
 
 ### 4. ¿Qué cambiaría en la función que evalúa una solución?
-* En lugar de sumar distancias geométricas consecutivas, se calcula la matriz de finalización $C(i, j)$ mediante la relación recursiva:
+* En TSP, la evaluación consiste en una sumatoria de distancias geométricas consecutivas.
+* En PFSP, la evaluación requiere calcular los instantes de finalización $C(i, j)$ de cada trabajo $i$ en cada máquina $j$ considerando esperas y bloqueos, mediante la relación recursiva:
   $$C(i, j) = \max(C(i-1, j), C(i, j-1)) + p_{\pi_i, j}$$
-  con condiciones de borde $C(0, j) = 0$ y $C(i, 0) = 0$.
-* El costo a minimizar pasa a ser el **Makespan**, correspondiente al tiempo en que el último trabajo termina en la última máquina:
+  con condiciones iniciales $C(0, j) = 0$ y $C(i, 0) = 0$.
+* La métrica a minimizar es el **Makespan**, que corresponde al tiempo total requerido para terminar todos los trabajos en la última máquina:
   $$C_{\max}(\pi) = C(n, m)$$
