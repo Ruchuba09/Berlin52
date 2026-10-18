@@ -6,10 +6,10 @@ Implementación modular de la metaheurística Sistema de Colonia de Hormigas (*A
 
 ## 1. Requisitos e Instalación
 
-Para ejecutar este proyecto se requiere Python 3.8 o superior y las siguientes bibliotecas:
+Para ejecutar este proyecto se requiere Python 3.8 o superior e instalar el conjunto completo de dependencias mediante el archivo `requirements.txt`:
 
 ```bash
-pip install numpy pandas matplotlib
+pip install -r requirements.txt
 ```
 
 ---
@@ -23,14 +23,16 @@ Berlin52-main/
 ├── acs.py                 # Orquestador principal del algoritmo ACS
 ├── operadores.py          # Biblioteca de funciones (distancias, heurística, feromonas)
 ├── tests.py               # Casos de prueba automatizados de los operadores
-├── graficar.py            # Generación de gráficos a partir de los resultados
+├── graficar.py            # Generación automática de gráficos por lote
+├── requirements.txt       # Lista de dependencias del entorno Python
 ├── datos/
-│   └── berlin52.tsp.txt   # Instancia de coordenadas de ciudades
+│   └── berlin52.tsp.txt   # Instancia de coordenadas de ciudades (TSPLIB)
 ├── resultados/
 │   └── resultados.csv     # Archivo estructurado con los resultados experimentales
 ├── graficos/
-│   └── grafico1.png       # Trazado de la ruta encontrada
-└── README.md              # Documentación y guía de uso
+│   ├── grafico1.png       # Trazado oficial de la mejor ruta global del estudio
+│   └── grafico_exp*.png   # Trazados individuales generados por experimento
+└── README.md              # Documentación técnica y guía de usuario
 ```
 
 ---
@@ -70,11 +72,13 @@ python tests.py
 ---
 
 ### C. Generación del Gráfico de la Ruta (`graficar.py`)
-Para procesar el archivo CSV de salida y graficar la ruta sobre el plano cartesiano:
+Para generar la visualización de la ruta a partir de los resultados:
 
 ```bash
 python graficar.py resultados/resultados.csv
 ```
+
+* **Nombrado automático por experimento:** El script procesa todas las filas registradas en el CSV y genera una imagen individual identificada con sus parámetros y costo en `graficos/grafico_exp[ID]_s[semilla]_h[hormigas]_c[costo].png`.
 
 ---
 
@@ -100,7 +104,7 @@ python graficar.py resultados/resultados.csv
 * **Actualización global de feromona:**
   $$\tau_{ij} \leftarrow (1 - \alpha) \cdot \tau_{ij} + \alpha \cdot \Delta \tau_{ij}$$
   $$\Delta \tau_{ij} = \frac{1}{L_{gb}}$$
-  *(aplicada exclusivamente sobre las aristas de la mejor ruta global $L_{gb}$).*
+  *(aplicada exclusivamente sobre las aristas pertenecientes a la mejor ruta global $L_{gb}$).*
 
 ---
 
@@ -114,20 +118,20 @@ python graficar.py resultados/resultados.csv
 
 ## 7. Formato del Archivo de Resultados (`resultados.csv`)
 
-El archivo de salida almacena la información necesaria para el análisis posterior:
+El archivo de salida almacena la información estructurada de las corridas para su posterior procesamiento:
 * `Instancia`: Nombre o ruta del archivo evaluado.
-* `Semilla`: Semilla aleatoria utilizada.
+* `Semilla`: Semilla aleatoria utilizada para reproducibilidad.
 * `Hormigas`, `Iteraciones`, `Evaporacion`, `Beta`, `q0`: Hiperparámetros de la ejecución.
-* `Mejor_Costo`: Distancia mínima encontrada.
-* `Iteracion_Mejor`: Iteración en la que se halló la mejor solución.
+* `Mejor_Costo`: Distancia mínima encontrada por el algoritmo.
+* `Iteracion_Mejor`: Iteración exacta en la que se halló la mejor solución.
 * `Tiempo_CPU`: Tiempo de procesamiento en segundos.
-* `Ruta`: Secuencia ordenada de ciudades visitadas.
+* `Ruta`: Secuencia ordenada de ciudades visitadas separadas por guiones.
 
 ---
 
 ## 8. Transferencia a un Problema Más Complejo (PFSP)
 
-Respuestas al análisis de transferencia metodológica hacia el *Permutation Flow Shop Scheduling Problem* (PFSP):
+Respuestas al análisis formativo de transferencia metodológica hacia el *Permutation Flow Shop Scheduling Problem* (PFSP):
 
 ### 1. ¿Qué partes de `acs.py` podrían mantenerse?
 * **Arquitectura de control del flujo:** Se mantiene el ciclo principal de iteraciones, la inicialización de estructuras, la construcción iterativa de soluciones por hormiga y el registro de la mejor solución global.
