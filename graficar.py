@@ -63,9 +63,6 @@ def main():
         print("Error: El archivo CSV no contiene registros válidos o falta la columna 'Ruta'.")
         sys.exit(1)
 
-    # Identificar la mejor corrida global para grafico1.png
-    idx_mejor_global = df['Mejor_Costo'].idxmin()
-
     print(f"Procesando {len(df)} corridas registradas en {archivo_csv}...\n")
 
     for i, fila in df.iterrows():
@@ -81,7 +78,7 @@ def main():
         coordenadas = leer_coordenadas_tsp(archivo_instancia)
         grafo, layout = construir_grafo(len(ruta), ruta, coordenadas)
 
-        # Nombre automático descriptivo por experimento
+        # Guarda exclusivamente la imagen identificada por experimento
         nombre_archivo = f"grafico_exp{i+1:02d}_s{semilla}_h{hormigas}_c{int(costo)}.png"
         ruta_salida = os.path.join(carpeta_graficos, nombre_archivo)
 
@@ -94,19 +91,6 @@ def main():
             background="white"
         )
         print(f"[{i+1}/{len(df)}] Guardado: {ruta_salida} (Costo: {costo:.2f})")
-
-        # Guardar copia de la mejor corrida como grafico1.png
-        if i == idx_mejor_global:
-            ruta_oficial = os.path.join(carpeta_graficos, "grafico1.png")
-            ig.plot(
-                grafo,
-                target=ruta_oficial,
-                layout=layout,
-                bbox=(800, 600),
-                margin=40,
-                background="white"
-            )
-            print(f"  -> Asignado como gráfico representativo oficial: {ruta_oficial}")
 
     print(f"\nProceso finalizado. Todas las imágenes están en la carpeta '{carpeta_graficos}/'.")
 
